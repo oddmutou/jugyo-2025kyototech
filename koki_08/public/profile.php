@@ -30,14 +30,32 @@ $select_sth->execute([
 ?>
 <a href="/bbs.php">掲示板に戻る</a>
 
-<h1><?= htmlspecialchars($user['name']) ?> さん のプロフィール</h1>
-<div>
-  <?php if(empty($user['icon_filename'])): ?>
-  現在アイコン未設定
-  <?php else: ?>
-  <img src="/image/<?= $user['icon_filename'] ?>"
-    style="height: 5em; width: 5em; border-radius: 50%; object-fit: cover;">
+<div style="
+  width: 100%; height: 15em;
+  <?php if(!empty($user['cover_filename'])): ?>
+  background: url('/image/<?= $user['cover_filename'] ?>') center;
+  background-size: cover;
   <?php endif; ?>
+"></div>
+
+<div style="position: relative; height: 5em; margin-bottom: 1em;">
+  <div style="position: absolute; top: -5em;">
+    <div style="display: flex; align-items: end; justify-content: start;">
+      <div style="margin: 0 1em; height: 10em; width: 10em; border: 3px solid white; border-radius: 50%;">
+        <?php if(empty($user['icon_filename'])): ?>
+        <div style="height: 100%; width: 100%; border-radius: 50%; background-color: lightgray; display: flex; justify-content: center; align-items: center;">
+          <div>アイコン未設定</div>
+        </div>
+        <?php else: ?>
+        <img src="/image/<?= $user['icon_filename'] ?>"
+          style="height: 100%; width: 100%; border-radius: 50%; object-fit: cover;">
+        <?php endif; ?>
+      </div>
+      <h1><?= htmlspecialchars($user['name']) ?></h1>
+    </div>
+  </div>
+</div>
+<div>
 </div>
 
 <div>
