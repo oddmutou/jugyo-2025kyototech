@@ -79,6 +79,7 @@ if (!empty($_SESSION['login_user_id'])) { // ログインしている場合
 <?php else: // フォローしている場合 ?>
 <div>
   <?= $relationship['created_at'] ?> にフォローしました。
+  (<a href="./follow_remove.php?followee_user_id=<?= $user['id'] ?>">フォロー解除</a>)
 </div>
 <?php endif; ?>
 

@@ -39,6 +39,7 @@ $select_sth->execute([
       (ID: <?= htmlspecialchars($relationship['followee_user_id']) ?>)
     </a>
     (<?= $relationship['created_at'] ?>にフォロー)
+    (<a href="./follow_remove.php?followee_user_id=<?= $relationship['followee_user_id'] ?>">フォロー解除</a>)
   </li>
   <?php endforeach; ?>
 </ul>
