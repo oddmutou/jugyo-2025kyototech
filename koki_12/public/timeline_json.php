@@ -44,6 +44,7 @@ foreach ($select_sth as $entry) {
     'id' => $entry['id'],
     'user_name' => $entry['user_name'],
     'user_profile_url' => '/profile.php?user_id=' . $entry['user_id'],
+    'user_icon_file_url' => empty($entry['user_icon_filename']) ? '' : ('/image/' . $entry['user_icon_filename']),
     'body' => bodyFilter($entry['body']),
     'image_file_url' => empty($entry['image_filename']) ? '' : ('/image/' . $entry['image_filename']),
     'created_at' => $entry['created_at'],
