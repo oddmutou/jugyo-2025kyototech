@@ -19,14 +19,35 @@ $sql = 'SELECT bbs_entries.*, users.name AS user_name, users.icon_filename AS us
   . ' FROM bbs_entries'
   . ' INNER JOIN users ON bbs_entries.user_id = users.id'
   . ' WHERE'
+  . (isset($_GET['last_id']) ? ' bbs_entries.id < :last_id AND' : '')
+  . '   ('
+  . '     bbs_entries.user_id IN'
+  . '       (SELECT followee_user_id FROM user_relationships WHERE follower_user_id = :login_user_id)'
+  . '     OR bbs_entries.user_id = :login_user_id'
+  . '   )'
+  . ' ORDER BY bbs_entries.created_at DESC'
+  . ' LIMIT 10';
+$sql_params = [];
+$sql_params[':login_user_id'] = $_SESSION['login_user_id'];
+if (isset($_GET['last_id'])) {
+  $sql_params[':last_id'] = intval($_GET['last_id']);
+}
+$select_sth = $dbh->prepare($sql);
+$select_sth->execute($sql_params);
+
+$last_id_sql = 'SELECT bbs_entries.id'
+  . ' FROM bbs_entries'
+  . ' INNER JOIN users ON bbs_entries.user_id = users.id'
+  . ' WHERE'
   . '   bbs_entries.user_id IN'
   . '     (SELECT followee_user_id FROM user_relationships WHERE follower_user_id = :login_user_id)'
   . '   OR bbs_entries.user_id = :login_user_id'
-  . ' ORDER BY bbs_entries.created_at DESC';
-$select_sth = $dbh->prepare($sql);
-$select_sth->execute([
-  ':login_user_id' => $_SESSION['login_user_id'],
-]);
+  . ' ORDER BY bbs_entries.created_at ASC'
+  . ' LIMIT 1';
+$last_id_select_sth = $dbh->prepare($last_id_sql);
+$last_id_select_sth->execute([':login_user_id' => $_SESSION['login_user_id']]);
+$last_id_result = $last_id_select_sth->fetch();
+$last_id = intval($last_id_result['id']);
 
 // bodyのHTMLを出力するための関数を用意する
 function bodyFilter (string $body): string
@@ -39,7 +60,9 @@ function bodyFilter (string $body): string
 
 // JSONに吐き出す用のentries
 $result_entries = [];
+$last_rendered_entry_id = null;
 foreach ($select_sth as $entry) {
+  $last_rendered_entry_id = $entry['id'];
   $result_entry = [
     'id' => $entry['id'],
     'user_name' => $entry['user_name'],
@@ -54,4 +77,8 @@ foreach ($select_sth as $entry) {
 
 header("HTTP/1.1 200 OK");
 header("Content-Type: application/json");
-print(json_encode(['entries' => $result_entries]));
+print(json_encode([
+  'entries' => $result_entries,
+  'last_rendered_entry_id' => $last_rendered_entry_id,
+  'last_entries_id' => $last_id,
+]));
